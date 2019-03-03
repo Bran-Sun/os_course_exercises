@@ -78,11 +78,24 @@ SETGATE(intr, 1,2,3,0);
 
 1. 请在ucore中找一段你认为难度适当的AT&T格式X86汇编代码，尝试解释其含义。
 
+   ```assembly
+       # Set up the important data segment registers (DS, ES, SS).
+       xorw %ax, %ax                                   # Segment number zero
+       movw %ax, %ds                                   # -> Data Segment
+       movw %ax, %es                                   # -> Extra Segment
+       movw %ax, %ss                                   # -> Stack Segment
+   ```
+
+   将de, es, ss清零。
+
 2. (option)请在rcore中找一段你认为难度适当的RV汇编代码，尝试解释其含义。
 
 #### 练习二
 
 宏定义和引用在内核代码中很常用。请枚举ucore或rcore中宏定义的用途，并举例描述其含义。
+
+* 定义常量
+* 常用代码片段，如do_div
 
 #### reference
  - [Intel格式和AT&T格式汇编区别](http://www.cnblogs.com/hdk1993/p/4820353.html)
