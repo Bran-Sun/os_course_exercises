@@ -22,24 +22,53 @@
 ### 启动顺序
 
 1. x86段寄存器的字段含义和功能有哪些？
-2. x86描述符特权级DPL、当前特权级CPL和请求特权级RPL的含义是什么？在哪些寄存器中存在这些字段？对应的访问条件是什么？
-3. 分析可执行文件格式elf的格式（无需回答）
+   1. CS: Code segment register. 存放代码段的段基址
+   2. DS: Data segment register. 存放数据段的段基址
+   3. ES: Extra segment register. 存放附加数据段的段基址
+   4. SS: Stack segment register. 存放堆栈的段基址
+   5. FS, GS: Extra segment register, 存放附加数据段的段基址
+
+1. x86描述符特权级DPL、当前特权级CPL和请求特权级RPL的含义是什么？在哪些寄存器中存在这些字段？对应的访问条件是什么？
+   * CPL: current priviledge level. 当前进程的特权级
+   * DPL: descriptor priviledge level. 描述符特权级，规定访问该段的权限级别
+   * RPL: request priviledge level. 请求特权级，表示进程对段访问的特权级
+   * CS寄存器中的0，1bit组合表示程序的CPL
+   * 段描述符中存在DPL字段
+   * 段选择子中存在RPL字段
+   * 要求$$max(CPL, RPL)  \le DPL$$，默认用其中较小的特权级来访问
+
+1. 分析可执行文件格式elf的格式（无需回答）
 
 ### 4.1 C函数调用的实现
 
 ### 4.2 x86中断处理过程
 
 1. x86/RV中断处理中硬件压栈内容？用户态中断和内核态中断的硬件压栈有什么不同？
+
+   * 当前被打断程序使用的eflags, cs, eip, errorCode信息。如果有特权级变化，还需要保存用户栈ss和esp的值。
+   * 如果是用户态中断，会有特权级的变化，而内核态中断则不会变化。
+
 2. 为什么在用户态的中断响应要使用内核堆栈？
+
+   为了防止用户修改中断服务程序相应的数据和代码。
+
 3. x86中trap类型的中断门与interrupt类型的中断门有啥设置上的差别？如果在设置中断门上不做区分，会有什么可能的后果?
+
+   * 区别：当调用Interrupt gate时，Interrupt会被CPU自动禁止，而Trap则不会。
+   * 在处理中断时，先清除EFLAGS的IF位，可以避免重复触发中断。
+   * 但在Trap Gate时，没有必要，而且可能导致某些中断得不到相应。
 
 ### 4.3 练习四和五 ucore内核映像加载和函数调用栈分析
 
 1. ucore中，在kdebug.c文件中用到的函数`read_ebp`是内联的，而函数`read_eip`不是内联的。为什么要设计成这样？
+   * read_ebp()是内联的，所以读取的结果正好是print_stackframe()函数的ebp地址。
+   * read_eip()不是内联的，但是在该函数中读取的是返回地址的值，对应的是print_stackframe()函数中下一条语句的地址。
 
 ### 4.4 练习六 完善中断初始化和处理
 
 1. CPU加电初始化后中断是使能的吗？为什么？
+
+   在bootloader中会禁止使能，因为此时还没有加载IDT等中断处理服务。
 
 ## 开放思考题
 
